@@ -118,7 +118,8 @@ const finalCanonical = canonicalUrl || `${Astro.url.origin}${Astro.url.pathname}
   </head>
 
   <body class="font-montserrat w-full">
-    <NavBar client:idle forceSolid={forceSolidNav} />
+    <!-- <NavBar client:idle forceSolid={forceSolidNav} /> -->
+    <NavBar client:idle />
     <main>
       <slot />
     </main>
