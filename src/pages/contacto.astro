@@ -6,8 +6,20 @@ import { getImage } from "astro:assets";
 import HeroSubtitle from "../components/contacto/HeroSubtitle";
 import FormularioContacto from "../components/contacto/FormularioContacto";
 import UbicacionContacto from "../components/contacto/UbicacionContacto";
-import { CONTACT_DATA } from "src/constants";
+import { getContactData } from "../lib/api/contacto"
 
+async function getContacto() {
+  try {
+    const res = await fetch(getApiUrl(config.endpoints.configuracion.contacto));
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data ?? json;
+  } catch {
+    return null;
+  }
+}
+
+const contact = await getContactData();
 const optimizedHero = await getImage({ src: contactoBg, format: 'webp', width: 800 });
 ---
 
@@ -16,24 +28,22 @@ const optimizedHero = await getImage({ src: contactoBg, format: 'webp', width: 8
   description="¿Necesitas asesoría para tu negocio? Comunícate con TAMI Maquinarias. Atendemos consultas, soporte técnico y cotizaciones personalizadas en Perú."
   canonicalUrl="https://tamimaquinarias.com/contacto/"
 >
- <section
-    class="relative flex items-center justify-center text-white h-[30vh] sm:h-screen min-h-[47vh] px-4 overflow-hidden"
-  >
-   <AboutHeroBackground client:load imageSrc={optimizedHero.src} />
-   <div
-      class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6 pt-10 pb-4 sm:pt-0
-      bg-gradient-to-b from-[#046A63]/40 to-[#023B37]/60"
-    >
-      <h2
-        class="text-xl sm:text-5xl lg:text-7xl font-extrabold mb-2 leading-tight"
-      >CONTACTO</h2>
+  <section class="relative flex items-center justify-center text-white h-[30vh] sm:h-screen min-h-[47vh] px-4 overflow-hidden">
+    <AboutHeroBackground client:load imageSrc={optimizedHero.src} />
+    <div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6 pt-10 pb-4 sm:pt-0 bg-gradient-to-b from-[#046A63]/40 to-[#023B37]/60">
+      <h2 class="text-xl sm:text-5xl lg:text-7xl font-extrabold mb-2 leading-tight">CONTACTO</h2>
       <HeroSubtitle client:load />
     </div>
- </section>
+  </section>
 
-  <FormularioContacto client:load contact={CONTACT_DATA} />
-
-  <UbicacionContacto contact={CONTACT_DATA} />
-
+  {contact ? (
+    <>
+      <FormularioContacto client:load contact={contact} />
+      <UbicacionContacto contact={contact} />
+    </>
+  ) : (
+    <section class="py-24 px-4 text-center text-gray-600">
+      <p>No pudimos cargar la información de contacto. Escríbenos por WhatsApp.</p>
+    </section>
+  )}
 </Layout>
-

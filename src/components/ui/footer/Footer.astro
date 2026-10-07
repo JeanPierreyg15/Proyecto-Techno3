@@ -2,11 +2,14 @@
 // import logoTami from "@images/logos/logo-blanco-tami.gif";
 import logoTami from "@images/logos/logo-estatico_origin.webp";
 
-import socialMediaLinks from "@data/socialMedia.data";
+import { getContactData } from "src/lib/api/contacto";
+import { getSocialLinks } from "src/lib/api/redes";
 import CopyText from "./CopyText.astro";
 import { Image } from "astro:assets";
----
 
+const contact = await getContactData();
+const socialMediaLinks = await getSocialLinks(contact?.whatsapp);
+---
 
 <footer class="bg-teal-700 text-white py-8 lg:py-12 sm:px-16">
   <div

@@ -1,36 +1,21 @@
 import React, { useState } from "react";
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle2 } from "lucide-react";
 import TextTitulo from "./TextTitulo";
-
-interface ContactData {
-  map_url?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  hours?: string;
-}
+import type { ContactData } from "../../types/contacto.interface";
+import { telefonosEnLinea } from "../../lib/api/contacto";
 
 interface FormularioContactoProps {
-  contact?: ContactData;
+  contact: ContactData;
 }
 
 const FormularioContacto: React.FC<FormularioContactoProps> = ({ contact }) => {
-  // Default values for Tami Maquinarias
-  const defaultAddress = "Jr. Paruro 1401, Tienda 130 (Sótano), Galería Shopping Center Electronics, Lima, Perú";
-  const defaultPhone = "+51 978 883 199 / +51 936 910 425";
-  const defaultEmail = "informestami01@gmail.com";
-  const defaultHours = "Lunes a Viernes: 9:00 am a 9:00 pm";
-
-  const addressText = contact?.address || defaultAddress;
-  const phoneText = contact?.phone || defaultPhone;
-  const emailText = contact?.email || defaultEmail;
-  const hoursText = contact?.hours || defaultHours;
+  const { phones, email, address, hours } = contact;
 
   const [formData, setFormData] = useState({
     fullName: "",
     company: "",
     email: "",
-    phone: "",
+    phones: "",
     message: "",
   });
 
@@ -56,7 +41,7 @@ const FormularioContacto: React.FC<FormularioContactoProps> = ({ contact }) => {
         fullName: "",
         company: "",
         email: "",
-        phone: "",
+        phones: "",
         message: "",
       });
     }, 1500);
@@ -163,17 +148,17 @@ const FormularioContacto: React.FC<FormularioContactoProps> = ({ contact }) => {
                   {/* Teléfono */}
                   <div>
                     <label
-                      htmlFor="phone"
+                      htmlFor="phones"
                       className="block font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2"
                     >
                       Teléfono / WhatsApp *
                     </label>
                     <input
                       type="tel"
-                      id="phone"
-                      name="phone"
+                      id="phones"
+                      name="phones"
                       required
-                      value={formData.phone}
+                      value={formData.phones}
                       onChange={handleChange}
                       placeholder="Ej: +51 999 999 999"
                       className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#0C998A] focus:border-transparent transition-all text-gray-800 dark:text-white font-medium placeholder:text-gray-400 dark:placeholder:text-gray-500"
@@ -230,61 +215,72 @@ const FormularioContacto: React.FC<FormularioContactoProps> = ({ contact }) => {
               </div>
 
               {/* Canal 1: Teléfono */}
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-[#0C998A] flex items-center justify-center shrink-0">
-                  <Phone className="w-5 h-5" />
+              {phones.length > 0 && (
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-[#0C998A] flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                      Llámanos
+                    </h4>
+                    <p className="text-gray-800 dark:text-gray-200 text-sm font-semibold">
+                      {telefonosEnLinea(phones)}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                    Llámanos
-                  </h4>
-                  <p className="text-gray-800 dark:text-gray-200 text-sm font-semibold whitespace-pre-line">
-                    {phoneText}
-                  </p>
-                </div>
-              </div>
+              )}
 
               {/* Canal 2: Correo */}
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-[#0C998A] flex items-center justify-center shrink-0">
-                  <Mail className="w-5 h-5" />
+
+              {email && (
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-[#0C998A] flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                      Escríbenos
+                    </h4>
+                    <a
+                      href={`mailto:${email}`}
+                      className="text-gray-800 dark:text-gray-250 text-sm font-semibold hover:text-[#0C998A] transition-colors break-all"
+                    >
+                      {email}
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                    Escríbenos
-                  </h4>
-                  <a
-                    href={`mailto:${emailText}`}
-                    className="text-gray-800 dark:text-gray-250 text-sm font-semibold hover:text-[#0C998A] transition-colors break-all"
-                  >
-                    {emailText}
-                  </a>
-                </div>
-              </div>
+              )}
 
               {/* Canal 3: Dirección */}
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-[#0C998A] flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5" />
+              {address && (
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-[#0C998A] flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                      Ubicación
+                    </h4>
+                    <p className="text-gray-800 dark:text-gray-200 text-sm font-semibold leading-relaxed">
+                      {address}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                    Ubicación
-                  </h4>
-                  <p className="text-gray-800 dark:text-gray-200 text-sm font-semibold leading-relaxed">
-                    {addressText}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Horario footer */}
             <div className="mt-12 lg:mt-0 pt-6 border-t border-gray-100 dark:border-gray-800/80">
-              <div className="flex gap-3 items-center">
-                <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium italic">
-                  Atención: {hoursText}
-                </p>
+              <div className="flex gap-3 items-start">
+                <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0 mt-0.5" />
+                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium italic">
+                  {hours.length > 0 ? (
+                    hours.map((h) => <p key={h.label}>{h.label}: {h.text}</p>)
+                  ) : (
+                    <p>Consúltanos por WhatsApp</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>

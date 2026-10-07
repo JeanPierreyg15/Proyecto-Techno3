@@ -7,6 +7,8 @@ import ScrollModal from "../components/ui/ScrollModal.tsx";
 import Toast from "../components/ui/Toast.astro";
 import ChatbotWidget from "../components/ui/chatbot/ChatbotWidget.tsx";
 import SocialWidget from "src/components/ui/SocialWidget.astro";
+import { getContactData } from "src/lib/api/contacto";
+import { getSocialLinks } from "src/lib/api/redes";
 
 interface Props {
   title: string;
@@ -15,16 +17,18 @@ interface Props {
   keywords?: string;
   forceSolidNav?: boolean;
 }
-const {
-  title,
-  description,
-  canonicalUrl,
-  keywords,
-  forceSolidNav = false,
-} = Astro.props;
+const { title, description, canonicalUrl, keywords,
+        forceSolidNav = false,
+      } = Astro.props;
 
 const finalCanonical = canonicalUrl || `${Astro.url.origin}${Astro.url.pathname}`;
+const contact = await getContactData();
+const rawSocialLinks = await getSocialLinks(contact?.whatsapp);
 
+const socialMediaLinks = rawSocialLinks.map(({ image, ...rest }) => ({
+  ...rest,
+  image: { src: image.src, width: image.width, height: image.height },
+}));
 ---
 
 <!doctype html>
@@ -118,8 +122,7 @@ const finalCanonical = canonicalUrl || `${Astro.url.origin}${Astro.url.pathname}
   </head>
 
   <body class="font-montserrat w-full">
-    <!-- <NavBar client:idle forceSolid={forceSolidNav} /> -->
-    <NavBar client:idle />
+    <NavBar client:load forceSolid={forceSolidNav} socialMediaLinks={socialMediaLinks} />
     <main>
       <slot />
     </main>

@@ -16,9 +16,6 @@ import { Image, getImage } from "astro:assets";
 import AboutHeroBackground from "../components/about/AboutHeroBackground.jsx";
 import Picture from "astro/components/Picture.astro";
 
-
-
-
 // Optimizar la imagen de Desktop en el servidor
 const desktopImage = await getImage({
   src: bg_card4,
@@ -35,8 +32,6 @@ const mobileImage = await getImage({
 
 
 const optimizedHero = await getImage({ src: aboutHero, format: 'webp', width: 800 });
-
-
 ---
 
 <!-- Cargar CSS de Swiper temprano -->

@@ -8,8 +8,8 @@ import { lazy, useEffect, useState } from "react";
 import apiClient from "src/services/apiClient";
 import { config } from "config";
 import NavSocialMediaLink from "./NavSocialMediaLink";
-import socialMediaLinks from "@data/socialMedia.data";
 import userIcon from "@icons/icon_user.webp";
+
 const NavLink = lazy(() => import("../navbar/NavLink"));
 
 interface NavLink {

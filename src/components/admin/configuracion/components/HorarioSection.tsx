@@ -4,6 +4,8 @@ import { fireSwal } from "../utils/swal";
 import PreviewFrame from "./PreviewFrame";
 import type { HorarioDia, HorarioData } from "../../configuracion/types/types";
 import { getConfiguracion, saveConfiguracion } from "../utils/ConfiguracionApi";
+import TimeSelect from "./TimeSelect";
+import { formatHora12 } from "../utils/FormatHoras";
 
 interface FormErrors {
     [index: number]: string;
@@ -49,8 +51,8 @@ export default function HorarioSection() {
                         return {
                             ...diaInicial,
                             ...(saved ?? {}),
-                            abierto: Boolean(saved?.abierto), 
-                            hora_inicio: (saved?.hora_inicio ?? "").slice(0, 5), 
+                            abierto: Boolean(saved?.abierto),
+                            hora_inicio: (saved?.hora_inicio ?? "").slice(0, 5),
                             hora_fin: (saved?.hora_fin ?? "").slice(0, 5),
                         };
                     }),
@@ -150,7 +152,7 @@ export default function HorarioSection() {
                 })),
             };
 
-           await saveConfiguracion("horario", dataToSave);
+            await saveConfiguracion("horario", dataToSave);
 
             setData(dataToSave);
 
@@ -220,38 +222,20 @@ export default function HorarioSection() {
                                 {d.dia_grupo}
                             </span>
 
-                            <input
-                                type="time"
+                            <TimeSelect
                                 value={d.hora_inicio}
                                 disabled={!d.abierto}
-                                onChange={(e) =>
-                                    actualizarDia(i, {
-                                        hora_inicio: e.target.value,
-                                    })
-                                }
-                                className={`px-2 py-1.5 border rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-300 dark:disabled:text-gray-600 ${errors[i]
-                                        ? "border-red-500"
-                                        : "border-gray-300 dark:border-gray-700"
-                                    }`}
+                                hasError={Boolean(errors[i])}
+                                onChange={(v) => actualizarDia(i, { hora_inicio: v })}
                             />
 
-                            <span className="text-gray-400 dark:text-gray-500 text-sm">
-                                a
-                            </span>
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">a</span>
 
-                            <input
-                                type="time"
+                            <TimeSelect
                                 value={d.hora_fin}
                                 disabled={!d.abierto}
-                                onChange={(e) =>
-                                    actualizarDia(i, {
-                                        hora_fin: e.target.value,
-                                    })
-                                }
-                                className={`px-2 py-1.5 border rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-300 dark:disabled:text-gray-600 ${errors[i]
-                                        ? "border-red-500"
-                                        : "border-gray-300 dark:border-gray-700"
-                                    }`}
+                                hasError={Boolean(errors[i])}
+                                onChange={(v) => actualizarDia(i, { hora_fin: v })}
                             />
 
                             <label className="ml-auto flex items-center gap-2 cursor-pointer select-none">
@@ -275,14 +259,14 @@ export default function HorarioSection() {
                                         })
                                     }
                                     className={`w-10 h-6 rounded-full transition-colors relative ${d.abierto
-                                            ? "bg-teal-600 dark:bg-teal-500"
-                                            : "bg-gray-300 dark:bg-gray-600"
+                                        ? "bg-teal-600 dark:bg-teal-500"
+                                        : "bg-gray-300 dark:bg-gray-600"
                                         }`}
                                 >
                                     <span
                                         className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${d.abierto
-                                                ? "translate-x-4"
-                                                : ""
+                                            ? "translate-x-4"
+                                            : ""
                                             }`}
                                     />
                                 </button>
@@ -354,7 +338,7 @@ export default function HorarioSection() {
                                     </p>
 
                                     <p className="text-xs text-teal-200">
-                                        {d.hora_inicio} a {d.hora_fin}
+                                        {formatHora12(d.hora_inicio)} a {formatHora12(d.hora_fin)}
                                     </p>
                                 </div>
                             ))}

@@ -1,65 +1,52 @@
-import { useState, useEffect, lazy } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import logoTami from "@images/logos/logo-estatico-100x116.webp";
 import navLinks from "@data/navlinks.data";
 import { IoClose, IoMenu } from "react-icons/io5";
 import ActiveLink from "./ActiveLink";
+import type { SocialLink } from "../../../types/contacto.interface";
 
 const SideMenu = lazy(() => import("../sideMenu/SideMenu"));
 
 interface NavBarProps {
   forceSolid?: boolean;
+  socialMediaLinks: SocialLink[];
 }
 
-function NavBar({ forceSolid = false }: NavBarProps) {
+function NavBar({ forceSolid = false, socialMediaLinks }: NavBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const solid = isScrolled || forceSolid;
 
   useEffect(() => {
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        setIsScrolled(window.scrollY > 50);
-        ticking = false;
-      });
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    setIsScrolled(window.scrollY > 50);
-
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
     <header
-      className={`
-        fixed w-full top-0 z-50
-        transition-[background-color,box-shadow] duration-300 ease-in-out
-        ${isScrolled || forceSolid ? "bg-[#07625b] shadow-lg" : "bg-transparent shadow-none"}
-      `}
+      style={{
+        backgroundColor: solid ? "#07625b" : "transparent",
+        boxShadow: solid ? "0 10px 15px -3px rgb(0 0 0 / 0.1)" : "none",
+      }}
+      className="fixed top-0 z-50 w-full transition-[background-color,box-shadow] duration-300 ease-in-out"
     >
-      <div className="max-w-[1834px] mx-auto px-4 md:py-6 sm:px-6 lg:px-8 lg:py-6">
+      <div className="max-w-[1834px] mx-auto px-4 sm:px-6 lg:px-8 md:py-6">
         <div className="flex items-center justify-between h-24">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <a href="/" title="Ir a la sección de inicio">
-              <img
-                src={logoTami.src}
-                alt="Logo de Tami"
-                title="Tami logo"
-                width="64"
-                height="74"
-                className="h-18 md:h-25 w-auto object-contain"
-                fetchPriority="high"
-                loading="eager"
-                decoding="async"
-              />
-            </a>
-          </div>
+          <a href="/" title="Ir a la sección de inicio" className="flex-shrink-0">
+            <img
+              src={logoTami.src}
+              alt="Logo de Tami"
+              width="64"
+              height="74"
+              className="h-18 md:h-25 w-auto object-contain"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+            />
+          </a>
 
-          {/* Enlaces de escritorio */}
           <nav className="hidden lg:flex justify-center flex-grow">
             <ul className="flex items-center space-x-12">
               {navLinks.map((item) => (
@@ -75,7 +62,6 @@ function NavBar({ forceSolid = false }: NavBarProps) {
             </ul>
           </nav>
 
-          {/* Login y menú móvil */}
           <div className="flex items-center">
             <a
               href="/auth/sign-in"
@@ -85,25 +71,28 @@ function NavBar({ forceSolid = false }: NavBarProps) {
               LOGIN
             </a>
 
-            <div className="lg:hidden ml-4">
-              <button
-                className="w-12 h-12 flex items-center justify-center text-white"
-                title={isOpen ? "Cerrar Menú" : "Abrir Menú"}
-                aria-label={isOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
-                onClick={() => setIsOpen(!isOpen)}
-              >
-                {isOpen ? <IoClose size={32} /> : <IoMenu size={32} />}
-              </button>
-            </div>
+            <button
+              className="lg:hidden ml-4 w-12 h-12 flex items-center justify-center text-white"
+              title={isOpen ? "Cerrar Menú" : "Abrir Menú"}
+              aria-label={isOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
+              onClick={() => setIsOpen((prev) => !prev)}
+            >
+              {isOpen ? <IoClose size={32} /> : <IoMenu size={32} />}
+            </button>
           </div>
         </div>
       </div>
 
-      <SideMenu
-        links={navLinks}
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
+      {isOpen && (
+        <Suspense fallback={null}>
+          <SideMenu
+            socialMediaLinks={socialMediaLinks}
+            links={navLinks}
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+          />
+        </Suspense>
+      )}
     </header>
   );
 }

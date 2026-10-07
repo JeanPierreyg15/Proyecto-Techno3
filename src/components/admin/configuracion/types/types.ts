@@ -1,3 +1,4 @@
+// Interface´s para Configuracion Admin
 export interface ContactInfo {
     correo: string;
     telefono: string;
