@@ -313,33 +313,37 @@ export default function HorarioSection() {
 
             <PreviewFrame title="Vista previa">
                 {(mode) => (
-                    <div className="bg-gradient-to-br from-teal-700 to-teal-900 dark:from-teal-800 dark:to-teal-950 rounded-xl p-5 text-white">
-                        <h3 className="font-bold mb-4">
-                            Horario de atención
-                        </h3>
-
-                        {diasAbiertos.length === 0 && (
-                            <p className="text-sm text-teal-100 italic">
-                                Aún no hay horarios configurados
+                    <div className="bg-white p-4 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+                        <div className="rounded-xl bg-gradient-to-r from-teal-700 to-teal-500 p-4 text-white">
+                            <h3 className="text-lg font-bold">
+                                Horario de atención
+                            </h3>
+                            <p className="mt-1 text-xs text-teal-50">
+                                Estamos disponibles para atenderte.
                             </p>
-                        )}
+                        </div>
 
-                        <div
-                            className={
-                                mode === "desktop"
-                                    ? "grid grid-cols-1 gap-3"
-                                    : "space-y-3"
-                            }
-                        >
-                            {diasAbiertos.map((d) => (
-                                <div key={d.dia_grupo}>
-                                    <p className="text-sm font-medium">
-                                        {d.dia_grupo}
-                                    </p>
+                        <div className="mt-3 divide-y divide-gray-100 dark:divide-gray-800">
+                            {data.dias.map((dia) => (
+                                <div
+                                    key={dia.dia_grupo}
+                                    className={`flex gap-2 py-3 ${mode === "mobile"
+                                            ? "flex-col items-start"
+                                            : "flex-row items-center justify-between"
+                                        }`}
+                                >
+                                    <span className="text-sm font-medium">
+                                        {dia.dia_grupo}
+                                    </span>
 
-                                    <p className="text-xs text-teal-200">
-                                        {formatHora12(d.hora_inicio)} a {formatHora12(d.hora_fin)}
-                                    </p>
+                                    <span className={`text-sm ${dia.abierto && dia.hora_inicio && dia.hora_fin
+                                            ? "text-gray-600 dark:text-gray-300"
+                                            : "text-gray-400"
+                                        }`}>
+                                        {dia.abierto && dia.hora_inicio && dia.hora_fin
+                                            ? `${formatHora12(dia.hora_inicio)} – ${formatHora12(dia.hora_fin)}`
+                                            : "Cerrado"}
+                                    </span>
                                 </div>
                             ))}
                         </div>

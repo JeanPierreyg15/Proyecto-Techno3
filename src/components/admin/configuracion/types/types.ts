@@ -6,6 +6,13 @@ export interface ContactInfo {
     direccion: string;
 }
 
+export interface ContactApi {
+    correo?: string | null;
+    telefono?: string | null;
+    telefono_opcional?: string | null;
+    direccion?: string | null;
+}
+
 export interface RedExtra {
     id: string;
     tipo: String;

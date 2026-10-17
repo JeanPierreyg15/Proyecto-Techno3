@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import MapaEmbed from "../utils/MapaEmbed";
 import { Mail, Phone, MapPin, Plus, Minus, AlertCircle } from "lucide-react";
 import { fireSwal } from "../utils/swal";
-import PreviewFrame from "./PreviewFrame";
-import type { ContactInfo } from "../../configuracion/types/types";
+import { useDebounce } from "../utils/useDebounce";
+import type { ContactInfo, ContactApi } from "../../configuracion/types/types";
 import { getConfiguracion, saveConfiguracion } from "../utils/ConfiguracionApi";
 
 interface FormErrors {
@@ -20,6 +20,14 @@ const initialData: ContactInfo = {
     direccion: "",
 };
 
+const formatTelefono = (value: string): string => {
+    const d = value.replace(/\D/g, "");
+
+    return d.length === 9
+        ? `+51 ${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`
+        : `+51 ${d}`;
+};
+
 export default function GeneralSection() {
     const [data, setData] = useState<ContactInfo>(initialData);
     const [mostrarOpcional, setMostrarOpcional] = useState(false);
@@ -28,28 +36,33 @@ export default function GeneralSection() {
     const [loadError, setLoadError] = useState<string | null>(null);
     const [errors, setErrors] = useState<FormErrors>({});
 
+    const aplicarRespuesta = (saved: ContactApi) => {
+        const opcional = saved.telefono_opcional ?? null;
+
+        setData({
+            correo: saved.correo ?? "",
+            telefono: saved.telefono ?? "",
+            telefonoOpcional: opcional,
+            direccion: saved.direccion ?? "",
+        });
+
+        setMostrarOpcional(Boolean(opcional));
+    };
+
     useEffect(() => {
         getConfiguracion<ContactInfo>("contacto")
-            .then((res) => {
-                const saved = res ?? {}
-                setData({
-                    correo: saved.correo ?? "",
-                    telefono: saved.telefono ?? "",
-                    telefonoOpcional: saved.telefonoOpcional ?? null,
-                    direccion: saved.direccion ?? "",
-                });
-                if (saved.telefonoOpcional) setMostrarOpcional(true);
-            })
+            .then((res) => aplicarRespuesta(res ?? {}))
             .catch((error) => {
                 console.error("Error al cargar los datos:", error);
                 setLoadError("No se pudo cargar la información guardada.");
             })
             .finally(() => { setLoadingInicial(false); });
-        }, []);
+    }, []);
 
-    // Mapa
+    const direccionDebounced = useDebounce(data.direccion);
+
     const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
-        data.direccion.trim() || "Lima, Perú"
+        direccionDebounced.trim() || "Lima, Perú"
     )}&output=embed`;
 
     const validarCorreo = (correo: string): string | undefined => {
@@ -190,12 +203,12 @@ export default function GeneralSection() {
                 telefono: data.telefono.trim(),
                 telefonoOpcional:
                     mostrarOpcional && data.telefonoOpcional?.trim()
-                        ? data.telefonoOpcional.trim()
-                        : null,
+                        ? data.telefonoOpcional.trim() : null,
                 direccion: data.direccion.trim(),
             };
 
-            await saveConfiguracion("contacto", dataToSave);
+            const guardado = await saveConfiguracion<ContactApi>("contacto", dataToSave);
+            aplicarRespuesta(guardado ?? {});
 
             setData(dataToSave);
 
@@ -239,6 +252,18 @@ export default function GeneralSection() {
             telefonoOpcional: undefined,
         }));
     };
+
+    const telefonosPreview = [
+        data.telefono,
+        mostrarOpcional ? data.telefonoOpcional : null,
+    ]
+        .filter((t): t is string => Boolean(t?.trim()))
+        .map(formatTelefono)
+        .join(" / ");
+
+    const hayDatos = Boolean(
+        telefonosPreview || data.correo.trim() || data.direccion.trim()
+    );
 
     if (loadingInicial) {
         return (
@@ -471,72 +496,59 @@ export default function GeneralSection() {
                 </div>
             </div>
 
-            <PreviewFrame title="Vista previa">
-                {(mode) => (
-                    <div className="bg-gradient-to-br from-teal-700 to-teal-900 dark:from-teal-800 dark:to-teal-950 rounded-xl p-5 text-white">
-                        <h3 className="font-bold mb-4">
-                            Canales Directos
-                        </h3>
+            <aside className="sticky top-6 h-fit max-h-[calc(100vh-3rem)] space-y-4 overflow-y-auto">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                    Vista previa
+                </h3>
 
-                        <div
-                            className={
-                                mode === "desktop"
-                                    ? "grid grid-cols-1 gap-4"
-                                    : "space-y-4"
-                            }
-                        >
-                            <div className="flex items-start gap-3">
-                                <Phone className="w-4 h-4 mt-0.5 shrink-0" />
+                <div className="rounded-xl bg-gradient-to-br from-teal-700 to-teal-900 p-5 text-white dark:from-teal-800 dark:to-teal-950">
+                    <h4 className="mb-4 font-bold">Canales Directos</h4>
 
-                                <div>
-                                    <p className="text-[10px] uppercase text-teal-200 tracking-wide">
-                                        Llámanos
-                                    </p>
-
-                                    <p className="text-sm">
-                                        {data.telefono || "Sin teléfono"}
-
-                                        {data.telefonoOpcional && (
-                                            <>
-                                                {" / "}
-                                                {data.telefonoOpcional}
-                                            </>
-                                        )}
-                                    </p>
+                    {!hayDatos ? (
+                        <p className="text-sm text-teal-200">
+                            Completa los campos para ver cómo se mostrarán.
+                        </p>
+                    ) : (
+                        <div className="space-y-4">
+                            {telefonosPreview && (
+                                <div className="flex items-start gap-3">
+                                    <Phone className="mt-0.5 h-4 w-4 shrink-0" />
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-wide text-teal-200">
+                                            Llámanos
+                                        </p>
+                                        <p className="text-sm">{telefonosPreview}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="flex items-start gap-3">
-                                <Mail className="w-4 h-4 mt-0.5 shrink-0" />
-
-                                <div>
-                                    <p className="text-[10px] uppercase text-teal-200 tracking-wide">
-                                        Escríbenos
-                                    </p>
-
-                                    <p className="text-sm break-all">
-                                        {data.correo || "Sin correo"}
-                                    </p>
+                            {data.correo.trim() && (
+                                <div className="flex items-start gap-3">
+                                    <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-wide text-teal-200">
+                                            Escríbenos
+                                        </p>
+                                        <p className="break-all text-sm">{data.correo.trim()}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="flex items-start gap-3">
-                                <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-
-                                <div>
-                                    <p className="text-[10px] uppercase text-teal-200 tracking-wide">
-                                        Ubicación
-                                    </p>
-
-                                    <p className="text-sm">
-                                        {data.direccion || "Sin dirección"}
-                                    </p>
+                            {data.direccion.trim() && (
+                                <div className="flex items-start gap-3">
+                                    <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-wide text-teal-200">
+                                            Ubicación
+                                        </p>
+                                        <p className="text-sm">{data.direccion.trim()}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    </div>
-                )}
-            </PreviewFrame>
+                    )}
+                </div>
+            </aside>
         </div>
     );
 }

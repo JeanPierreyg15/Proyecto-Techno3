@@ -8,48 +8,76 @@ interface PreviewFrameProps {
     children: (mode: DeviceMode) => ReactNode;
 }
 
-export default function PreviewFrame({ title = "Vista Previa", children }: PreviewFrameProps) {
+export default function PreviewFrame(
+    { title = "Vista Previa", children }: PreviewFrameProps) {
+
     const [mode, setMode] = useState<DeviceMode>("desktop");
+    const isMobile = mode === "mobile";
+
 
     return (
-        <div className="lg:sticky lg:top-8">
-            <div className="flex items-center justify-between mb-6 border-b border-gray-200 dark:border-gray-700 pb-2">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+        <section className="sticky top-6 min-w-0 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                     {title}
-                </h2>
-                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                </h3>
+
+                <div
+                    className="inline-flex items-center gap-1 rounded-xl border
+            border-gray-200 bg-gray-100 p-1 dark:border-gray-700
+            dark:bg-gray-800"
+                    role="group"
+                    aria-label="Tamaño de la vista previa"
+                >
                     <button
                         type="button"
                         onClick={() => setMode("desktop")}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md hidden lg:flex items-center gap-2 transition-all ${
-                            mode === "desktop"
-                                ? "bg-white dark:bg-gray-700 text-teal-600 dark:text-teal-400 shadow-sm"
-                                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                        }`}
+                        aria-pressed={!isMobile}
+                        aria-label="Vista de escritorio"
+                        className={`flex items-center gap-2 rounded-lg px-3 py-2
+              text-xs font-medium transition-colors duration-200
+              ${!isMobile
+                                ? "bg-white text-teal-700 shadow-sm dark:bg-gray-700 dark:text-teal-300"
+                                : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                            }`}
                     >
-                        <Monitor className="h-4 w-4" />
-                        Escritorio
+                        <Monitor size={16} />
+                        <span>Desktop</span>
                     </button>
+
                     <button
                         type="button"
                         onClick={() => setMode("mobile")}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md flex items-center gap-2 transition-all ${
-                            mode === "mobile"
-                                ? "bg-white dark:bg-gray-700 text-teal-600 dark:text-teal-400 shadow-sm"
-                                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                        }`}
+                        aria-pressed={isMobile}
+                        aria-label="Vista de celular"
+                        className={`flex items-center gap-2 rounded-lg px-3 py-2
+              text-xs font-medium transition-colors duration-200
+              ${isMobile
+                                ? "bg-white text-teal-700 shadow-sm dark:bg-gray-700 dark:text-teal-300"
+                                : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                            }`}
                     >
-                        <Smartphone className="h-4 w-4" />
-                        Móvil
+                        <Smartphone size={16} />
+                        <span>Mobile</span>
                     </button>
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex justify-center items-center relative min-h-[360px] transition-all duration-300 overflow-hidden p-6">
-                <div className={mode === "mobile" ? "w-full max-w-[280px]" : "w-full max-w-sm"}>
-                    {children(mode)}
+            <div
+                className="flex min-h-[360px] items-start justify-center overflow-hidden
+          rounded-2xl border border-gray-200 bg-gray-50 p-4
+          transition-colors duration-200 sm:p-6
+          dark:border-gray-700 dark:bg-gray-900"
+            >
+                <div
+                    className={`w-full transition-[max-width] duration-300 ease-in-out ${isMobile ? "max-w-[375px]" : "max-w-2xl"
+                        }`}
+                >
+                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-950">
+                        <div className="min-h-[320px]">{children(mode)}</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     );
 }

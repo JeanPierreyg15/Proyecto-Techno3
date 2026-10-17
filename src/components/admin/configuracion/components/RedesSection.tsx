@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Instagram, Facebook, Twitter, Youtube, Link2, Trash2, Plus, AlertCircle, } from "lucide-react";
 import { fireSwal } from "../utils/swal";
-import PreviewFrame from "./PreviewFrame";
 import type { RedesSociales, RedExtra, RedApi } from "../../configuracion/types/types";
 import { getConfiguracion, saveConfiguracion } from "../utils/ConfiguracionApi";
+import SocialProfilePreview, { type SocialPlatform } from "./SocialProfilePreview";
 
 interface FormErrors {
     instagram?: string;
@@ -131,6 +131,18 @@ export default function RedesSection() {
 
         setData({ ...(fijas as Omit<RedesSociales, "otras">), otras });
     };
+
+    function normalizePlatform(value: string): SocialPlatform {
+        const platform = value.toLowerCase();
+
+        if (platform.includes("instagram")) return "instagram";
+        if (platform.includes("facebook")) return "facebook";
+        if (platform.includes("tiktok") || platform.includes("tik tok")) return "tiktok";
+        if (platform.includes("youtube")) return "youtube";
+        if (platform.includes("twitter") || platform === "x") return "twitter";
+
+        return "other";
+    }
 
     useEffect(() => {
         getConfiguracion<RedApi[]>("redes")
@@ -435,21 +447,20 @@ export default function RedesSection() {
         );
     }
 
-    const redesConLink = [
-        ...REDES_FIJAS.filter(
-            (red) => data[red.key].trim()
-        ).map((red) => ({
-            label: red.label,
-            Icon: red.Icon,
-            url: data[red.key],
+    const redesPreview = [
+        ...REDES_FIJAS.filter((red) => data[red.key].trim()).map((red) => ({
+            id: red.key as string,
+            platform: red.key as SocialPlatform,
+            nombre: red.label,
+            url: normalizarUrl(data[red.key]),
         })),
-
         ...data.otras
             .filter((red) => red.url.trim())
             .map((red) => ({
-                label: red.nombre.trim() || "Otra red",
-                Icon: Link2,
-                url: red.url,
+                id: red.id,
+                platform: normalizePlatform(red.nombre),
+                nombre: red.nombre.trim() || "Otra red",
+                url: normalizarUrl(red.url),
             })),
     ];
 
@@ -664,55 +675,26 @@ export default function RedesSection() {
                 </div>
             </div>
 
-            <PreviewFrame title="Vista previa">
-                {(mode) => (
-                    <div className="bg-gradient-to-br from-teal-700 to-teal-900 dark:from-teal-800 dark:to-teal-950 rounded-xl p-5 text-white">
-                        <h3 className="font-bold">
-                            Redes Sociales
-                        </h3>
+            <aside className="sticky top-6 h-fit max-h-[calc(100vh-3rem)] space-y-4 overflow-y-auto">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                    Vista previa
+                </h3>
 
-                        <p className="text-xs text-teal-200 mb-4">
-                            Síguenos en nuestras redes
-                        </p>
-
-                        {redesConLink.length === 0 && (
-                            <p className="text-sm text-teal-100 italic">
-                                Aún no hay enlaces cargados
-                            </p>
-                        )}
-
-                        <div
-                            className={
-                                mode === "desktop"
-                                    ? "grid grid-cols-2 gap-2"
-                                    : "space-y-2"
-                            }
-                        >
-                            {redesConLink.map((red, index) => {
-                                const Icon = red.Icon;
-
-                                return (
-                                    <a
-                                        key={`${red.label}-${index}`}
-                                        href={normalizarUrl(
-                                            red.url
-                                        )}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 hover:bg-white/20 transition-colors"
-                                    >
-                                        <Icon className="w-4 h-4 shrink-0" />
-
-                                        <span className="text-sm truncate">
-                                            {red.label}
-                                        </span>
-                                    </a>
-                                );
-                            })}
-                        </div>
-                    </div>
+                {redesPreview.length === 0 ? (
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                        Agrega un enlace para ver la vista previa.
+                    </p>
+                ) : (
+                    redesPreview.map((red) => (
+                        <SocialProfilePreview
+                            key={red.id}
+                            platform={red.platform}
+                            accountName={red.nombre}
+                            url={red.url}
+                        />
+                    ))
                 )}
-            </PreviewFrame>
+            </aside>
         </div>
     );
 }
