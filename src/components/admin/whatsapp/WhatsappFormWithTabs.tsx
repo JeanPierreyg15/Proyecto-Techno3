@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import WhatsappConnection from './WhatsappConnection';
-import CampañaForm from './CampañaForm';
+import CampanaForm from './CampanaForm';
 import { useWhatsapp } from 'src/hooks/admin/whatsapp/useWhatsapp';
 interface WhatsappFormWithTabsProps {
     onClose: () => void;
@@ -185,7 +185,7 @@ export default function WhatsappFormWithTabs({ onClose }: WhatsappFormWithTabsPr
                 {activeTab === 'connection' ? (
                     <WhatsappConnection />
                 ) : activeTab === 'campaña' ? (
-                    <CampañaForm />
+                    <CampanaForm />
                 ) : (
                     <div className="space-y-4">
                         {/*  SELECTOR DE PRODUCTOS */}

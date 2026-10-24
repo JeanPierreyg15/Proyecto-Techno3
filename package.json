@@ -6,7 +6,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "node --experimental-strip-types --test --test-reporter=spec \"src/**/*.test.ts\"",
+    "test:csv": "node --experimental-strip-types --test --test-reporter=spec src/utils/csv.test.ts",
+    "test:busqueda": "node --experimental-strip-types --test --test-reporter=spec src/utils/debouncedSearch.test.ts",
+    "test:watch": "node --experimental-strip-types --test --watch src/utils/debouncedSearch.test.ts src/utils/csv.test.ts"
   },
   "dependencies": {
     "@astrojs/partytown": "^2.1.7",

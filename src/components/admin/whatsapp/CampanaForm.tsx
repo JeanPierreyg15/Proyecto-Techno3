@@ -5,7 +5,7 @@ interface Producto {
     nombre: string;
 }
 
-export default function CampañaForm() {
+export default function CampanaForm() {
     const [productos, setProductos] = useState<Producto[]>([]);
     const [isLoadingProductos, setIsLoadingProductos] = useState(true);
     const [isEnviando, setIsEnviando] = useState(false);
