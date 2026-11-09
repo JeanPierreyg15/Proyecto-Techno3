@@ -4,6 +4,7 @@ import { config } from "config";
 import type Blog from "src/models/Blog";
 import { fetchBuildJson } from "src/lib/api/buildFetch";
 import { normalizeLink } from "src/utils/blogLink";
+import { slugify } from "src/utils/slugify";
 
 export async function getStaticPaths() {
   const data = await fetchBuildJson<Blog[] | { data?: Blog[] }>(
@@ -21,7 +22,9 @@ export async function getStaticPaths() {
   const slugs = new Set<string>();
 
   for (const blog of blogs) {
-    const slug = normalizeLink(blog.link);
+    // normalizeLink limpia URLs completas/query strings; slugify además sanea
+    // caracteres ilegales (":", ",", "/") que tumban el mkdir en Windows.
+    const slug = slugify(normalizeLink(blog.link));
     if (slug) slugs.add(slug);
   }
 
