@@ -1,0 +1,13 @@
+---
+/**
+ * Página de respaldo para blogs.
+ *
+ * El sitio se genera de forma estática, por lo que un blog creado después del
+ * último despliegue no tiene carpeta propia y antes devolvía 404. `.htaccess`
+ * redirige internamente `/blog/<slug>/` hacia esta página cuando el archivo no
+ * existe; aquí se deduce el slug desde la URL y se carga el contenido por API.
+ */
+import BlogDetailView from "src/components/blog/BlogDetailView.astro";
+---
+
+<BlogDetailView />

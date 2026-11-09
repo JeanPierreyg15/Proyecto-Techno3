@@ -3,7 +3,7 @@
 import React from "react";
 import type Blog from "src/models/Blog";
 import { config } from "config";
-import { getBlogImageUrl } from "src/utils/blog";
+import { getBlogHref, getBlogImageUrl } from "src/utils/blog";
 
 interface CardBlogProps {
   blog: Blog;
@@ -17,7 +17,7 @@ const CardBlog: React.FC<CardBlogProps> = React.memo(({ blog }) => {
 
   return (
     <a
-      href={`/blog/${blog.link}`}
+      href={getBlogHref(blog.link)}
       title="Ver detalles del blog"
       className="mb-6 block group"
     >

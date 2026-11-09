@@ -1,15 +1,13 @@
 ---
-import { getApiUrl } from "@utils/getApiUrl";
 import type { Producto } from "@models/Product";
 import { config } from "config";
+import { fetchBuildJson } from "src/lib/api/buildFetch";
 
 let productsArray: Producto[] = [];
 
 try {
-  const res = await fetch(getApiUrl(config.endpoints.productos.list));
-  if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
-  const data = await res.json();
-  productsArray = Array.isArray(data.data) ? data.data : [];
+  const products = await fetchBuildJson<Producto[]>(config.endpoints.productos.list);
+  productsArray = Array.isArray(products) ? products : [];
 } catch (err) {
   console.error("Error al obtener productos destacados:", err);
   productsArray = [];

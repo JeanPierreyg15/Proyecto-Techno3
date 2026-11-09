@@ -13,6 +13,7 @@ interface BlogListProps {
 const BlogList = ({ searchTerm, sortOrder }: BlogListProps) => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
 
@@ -28,6 +29,8 @@ const BlogList = ({ searchTerm, sortOrder }: BlogListProps) => {
 
     const fetchBlogs = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const res = await fetch(apiUrlBlogs, { signal: controller.signal });
 
         if (!res.ok) throw new Error("HTTP error blogs!");
@@ -40,6 +43,8 @@ const BlogList = ({ searchTerm, sortOrder }: BlogListProps) => {
         if (err.name !== "AbortError") {
           setError("Error al cargar blogs");
         }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
@@ -93,7 +98,11 @@ const BlogList = ({ searchTerm, sortOrder }: BlogListProps) => {
 
   return (
     <>
-      {error ? (
+      {loading ? (
+        <p className="text-center text-teal-800 py-10 font-medium">
+          Cargando artículos...
+        </p>
+      ) : error ? (
         <p className="text-center text-red-600">{error}</p>
       ) : filteredAndSortedBlogs.length > 0 ? (
         <div className="grid grid-cols-1 gap-6">
@@ -103,7 +112,9 @@ const BlogList = ({ searchTerm, sortOrder }: BlogListProps) => {
         </div>
       ) : (
         <p className="text-center text-teal-800 py-10 font-medium">
-          No se encontraron resultados para tu búsqueda.
+          {searchTerm.trim()
+            ? "No se encontraron resultados para tu búsqueda."
+            : "Aún no hay artículos publicados."}
         </p>
       )}
 
