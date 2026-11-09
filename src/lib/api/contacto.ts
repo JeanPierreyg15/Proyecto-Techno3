@@ -1,5 +1,6 @@
-import { config, getApiUrl } from "../../../config";
+import { config } from "../../../config";
 import type { ContactData, HorarioData, ContactInfo } from "../../types/contacto.interface";
+import { fetchBuildJson } from "./buildFetch";
 
 const hhmm = (h?: string | null) => (h ?? "").slice(0, 5);
 
@@ -10,19 +11,12 @@ function tieneHorario(d: any): boolean {
   return !(ini === "00:00" && fin === "00:00");
 }
 
+/**
+ * Se mantiene la firma original, pero ahora usa caché y reintentos para no
+ * saturar la API durante la generación estática (esto causaba los errores 429).
+ */
 export async function fetchJson<T>(endpoint: string): Promise<T | null> {
-  try {
-    const res = await fetch(getApiUrl(endpoint));
-    if (!res.ok) {
-      console.error("FETCH FALLÓ:", endpoint, res.status);
-      return null;
-    }
-    const json = await res.json();
-    return (json?.data ?? json) as T;
-  } catch (e) {
-    console.error("FETCH ERROR:", endpoint, e);
-    return null;
-  }
+  return fetchBuildJson<T>(endpoint);
 }
 
 function formatHora(h?: string | null): string {

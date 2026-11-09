@@ -3,24 +3,24 @@ import Layout from "src/layouts/Layout.astro";
 import ProductPage from "src/components/products/ProductPage";
 import type Producto from "src/models/Product";
 import { config } from "../../../config";
+import { fetchBuildJson } from "src/lib/api/buildFetch";
+import { normalizeLink } from "src/utils/blogLink";
 
 export async function getStaticPaths() {
-  const apiUrl = config.apiUrl ? String(config.apiUrl).replace(/\/+$/, "") : "";
-  const url = `${apiUrl}${config.endpoints.productos.list}`;
-  const response = await fetch(url);
+  const data = await fetchBuildJson<Producto[] | { data?: Producto[] }>(
+    config.endpoints.productos.list,
+  );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-
-    console.log("Respuesta de la API:", errorText);
-
-    throw new Error(`Error obteniendo productos: ${response.status}`);
+  if (!data) {
+    // Con reintentos en `fetchBuildJson`, llegar aquí significa que la API
+    // sigue caída: es mejor fallar el build que desplegar el catálogo vacío.
+    throw new Error("Error obteniendo productos: la API no respondió");
   }
 
-  const data = await response.json();
   const products: Producto[] = Array.isArray(data) ? data : (data.data ?? []);
 
   return products
+    .map((product) => ({ ...product, link: normalizeLink(product.link) }))
     .filter((product) => product.link)
     .map((product) => ({
       params: {

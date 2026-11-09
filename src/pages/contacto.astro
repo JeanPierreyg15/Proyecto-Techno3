@@ -8,17 +8,6 @@ import FormularioContacto from "../components/contacto/FormularioContacto";
 import UbicacionContacto from "../components/contacto/UbicacionContacto";
 import { getContactData } from "../lib/api/contacto"
 
-async function getContacto() {
-  try {
-    const res = await fetch(getApiUrl(config.endpoints.configuracion.contacto));
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json?.data ?? json;
-  } catch {
-    return null;
-  }
-}
-
 const contact = await getContactData();
 const optimizedHero = await getImage({ src: contactoBg, format: 'webp', width: 800 });
 ---

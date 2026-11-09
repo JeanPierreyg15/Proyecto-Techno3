@@ -1,7 +1,7 @@
 import { useState, useDeferredValue, useCallback, useEffect, useMemo, useRef } from "react";
 import { FaSearch, FaSortAmountDown } from "react-icons/fa";
 import { getApiUrl, config } from "config";
-import { getBlogImageUrl, matchesBlogSearch } from "src/utils/blog";
+import { getBlogHref, getBlogImageUrl, matchesBlogSearch } from "src/utils/blog";
 import type Blog from "src/models/Blog";
 import { createPortal } from "react-dom";
 import BlogList from "./BlogList";
@@ -137,7 +137,7 @@ const BlogPage = () => {
             >
               {suggestions.map((blog) => (
                 <li key={blog.id}>
-                  <a href={`/blog/${blog.link}`} className="group flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-teal-50">
+                  <a href={getBlogHref(blog.link)} className="group flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-teal-50">
                     <div className="w-14 h-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                       <img src={getBlogImageUrl(blog.miniatura)} alt={blog.titulo} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     </div>

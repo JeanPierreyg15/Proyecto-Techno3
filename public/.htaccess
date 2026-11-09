@@ -24,5 +24,12 @@ RewriteRule ^(.*)$ /$1/ [L,R=301]
 # --- Habilitar rewrite para Astro ---
 RewriteBase /
 
+# 3b. Fallback para blogs creados después del último build.
+# El sitio es estático: si la carpeta de un blog todavía no existe, servimos
+# la página de respaldo (carga el contenido por API) en lugar de un 404.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^blog/[^/]+/?$ /detalle-blog/index.html [L]
+
 # 4. ErrorDocument 404
 ErrorDocument 404 /404.html

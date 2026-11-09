@@ -30,6 +30,7 @@ export default defineConfig({
                 !page.includes('/admin') &&
                 !page.includes('/auth/') &&
                 !page.includes('/blog/details') &&
+                !page.includes('/detalle-blog') &&
                 !page.includes('/buscar/')
         }),
         react(), 

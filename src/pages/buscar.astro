@@ -6,6 +6,7 @@ import Resultado from "./buscar/resultado.astro";
 import type Producto from "../models/Product";
 import type Blog from "../models/Blog";
 import Layout from "src/layouts/Layout.astro";
+import { fetchBuildJson } from "src/lib/api/buildFetch";
 
 const { searchParams } = Astro.url;
 const rawQuery = searchParams.get("q")?.trim() ?? "";
@@ -20,25 +21,19 @@ function normalizar(texto: string) {
 
 if (query) {
     try {
-        // Fetch productos
-        const resProductos = await fetch(`${config.apiUrl}${config.endpoints.productos.list}`);
-        if (resProductos.ok) {
-            const json = await resProductos.json();
-            const todos = json.data ?? [];
-
-            productos = todos.filter((producto: Producto) =>
+        // Fetch productos (cacheado entre páginas del build)
+        const todosProductos = await fetchBuildJson<Producto[]>(config.endpoints.productos.list);
+        if (todosProductos) {
+            productos = todosProductos.filter((producto: Producto) =>
                 [producto.nombre, producto.titulo, producto.subtitulo, producto.descripcion]
                     .some(campo => campo && normalizar(campo).includes(query))
             );
         }
 
-        // Fetch blogs
-        const resBlogs = await fetch(`${config.apiUrl}${config.endpoints.blogs.list}`);
-        if (resBlogs.ok) {
-            const json = await resBlogs.json();
-            const todos = json.data ?? [];
-
-            blogs = todos.filter((blog: Blog) =>
+        // Fetch blogs (cacheado entre páginas del build)
+        const todosBlogs = await fetchBuildJson<Blog[]>(config.endpoints.blogs.list);
+        if (todosBlogs) {
+            blogs = todosBlogs.filter((blog: Blog) =>
                 [blog.titulo, blog.subtitulo1, blog.nombre_producto, blog.subtitulo2]
                     .some(campo => campo && normalizar(campo).includes(query))
             );
